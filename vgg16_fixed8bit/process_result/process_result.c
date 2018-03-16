@@ -50,21 +50,33 @@ unordered_map<string,vector<int>> readResult(string file) {
 }
 
 int main() {
-    string infile1 = "val.txt", infile2 = "result.txt";
-    unordered_map<string, int> val = readVal(infile1);
-    unordered_map<string, vector<int>> res = readResult(infile2);
-    int one = 0, five = 0;
-    for(auto k = val.begin();k != val.end();k++) {
-	if(res.find(k->first) == res.end()) 
-	    continue;
-	vector<int> tmp = res[k->first];
-	one += (tmp[4] == k->second);
-	for(auto p:tmp) {
-	    five += (p == k->second);
+	int n = 9;
+	vector<unordered_map<string, vector<int>>> res;
+	for(int i = 0;i < n;i++) 
+		res.push_back(readResult("t" + to_string(i+1) + ".txt"));
+    unordered_map<string, int> val = readVal("val.txt");
+	vector<int> one(n,0), five(n,0);
+	int total_one = 0, total_five, total_size = 0;
+	for(int i = 0;i < n;i++) {
+		for(auto k = res[i].begin();k != res[i].end();k++) {
+			if(val.find(k->first) == val.end())
+				continue;
+			vector<int> tmp = res[i][k->first];
+			one[i] += (tmp[4] == val[k->first]);
+			for(auto p:tmp)
+				five[i] += (p == val[k->first]);
+		}
+		total_one += one[i];
+		total_five += five[i];
+		total_size += res[i].size();
+		cout << "package " << i+1 << ":" << endl;
+		cout << one[i]/(res[i].size() * 1.0) << endl;
+		cout << five[i]/(res[i].size() * 1.0) << endl;
 	}
-    }
-    cout << one/50000.0 << endl;
-    cout << five/50000.0 << endl;
+	cout << "total:" << endl;
+	cout << total_one/(total_size * 1.0) << endl;
+	cout << total_five/(total_size * 1.0) << endl;
+
     return 0;
 }
 
