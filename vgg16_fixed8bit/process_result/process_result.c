@@ -4,6 +4,7 @@
 #include<string>
 #include<algorithm>
 #include<fstream>
+#include<set>
 using namespace std;
 
 int to_int1(string str) {
@@ -49,33 +50,81 @@ unordered_map<string,vector<int>> readResult(string file) {
     return res;
 }
 
-int main() {
-	int n = 9;
-	vector<unordered_map<string, vector<int>>> res;
-	for(int i = 0;i < n;i++) 
-		res.push_back(readResult("t" + to_string(i+1) + ".txt"));
-    unordered_map<string, int> val = readVal("val.txt");
-	vector<int> one(n,0), five(n,0);
-	int total_one = 0, total_five, total_size = 0;
-	for(int i = 0;i < n;i++) {
-		for(auto k = res[i].begin();k != res[i].end();k++) {
-			if(val.find(k->first) == val.end())
-				continue;
-			vector<int> tmp = res[i][k->first];
-			one[i] += (tmp[4] == val[k->first]);
-			for(auto p:tmp)
-				five[i] += (p == val[k->first]);
-		}
-		total_one += one[i];
-		total_five += five[i];
-		total_size += res[i].size();
-		cout << "package " << i+1 << ":" << endl;
-		cout << one[i]/(res[i].size() * 1.0) << endl;
-		cout << five[i]/(res[i].size() * 1.0) << endl;
+unordered_map<string,int> get_syntaxs(string input) {
+	unordered_map<string,int> res;
+	ifstream infile(input);
+	string temp;
+	int i = 0;
+	while(getline(infile,temp))
+		res[temp.substr(10)+" "] = i++;
+	infile.close();
+	return res;
+}
+
+vector<string> get_different_class(string input) {
+	vector<string> res;
+	ifstream infile(input);
+	string temp;
+	while(getline(infile,temp))
+		res.push_back(temp);
+	infile.close();
+	return res;
+}
+
+set<int> class_index(string synsets, string diff_class) {
+	unordered_map<string,int> res = get_syntaxs(synsets);
+	vector<string> p = get_different_class(diff_class);
+	set<int> index;
+	for(int i = 0;i < p.size();i++) {
+		if(res.find(p[i]) == res.end())
+			continue;
+		index.insert(res[p[i]]);
 	}
-	cout << "total:" << endl;
-	cout << total_one/(total_size * 1.0) << endl;
-	cout << total_five/(total_size * 1.0) << endl;
+	return index;
+}
+
+void get_precision(set<int>& index, unordered_map<string,int>& val, unordered_map<string, vector<int>>& res) {
+	int one = 0, five = 0, size = 0, line = 0;
+	for(auto k = res.begin();k != res.end();k++) {
+		line++;
+		if(val.find(k->first) == val.end())
+			continue;
+		if(index.find(val[k->first]) != index.end())
+			continue;
+		size++;
+		vector<int> tmp = k->second;
+		one += (tmp[4] == val[k->first]);
+		for(auto p:tmp) 
+			five += (p == val[k->first]);
+	}
+	cout << "line: " << line << endl;
+	cout << "size: " << size << endl;
+	cout << one / (size*1.0) << endl;
+	cout << five / (size*1.0) << endl;
+	cout << endl;
+}
+
+int main() {
+	set<int> index = class_index("synset_words.txt","same_class.txt");
+    unordered_map<string, int> val = readVal("val2012.txt");
+	unordered_map<string,vector<int>> res;
+
+	res = readResult("result.txt");
+    cout << "result: " << endl;
+    cout << "size: " << res.size() << endl;
+    int one = 0, five = 0;
+    for(auto k = res.begin();k != res.end();k++) {
+        if(val.find(k->first) == val.end())
+            continue;
+        vector<int> tmp = k->second;
+        one += (tmp[4] == val[k->first]);
+        for(auto p:tmp)
+            five += (p == val[k->first]);
+    }
+    cout << one/(res.size()*1.0) << endl;
+    cout << five/(res.size()*1.0) << endl;
+	cout << "result: "<< endl;
+	get_precision(index,val,res);
 
     return 0;
 }

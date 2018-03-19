@@ -250,9 +250,9 @@ if __name__ == '__main__':
     imgs = tf.placeholder(tf.float32, [None, 224, 224, 3])
     vgg = vgg16(imgs, 'vgg16_weights.npz', sess)
 
-    f = os.listdir("img/t3/")
+    f = os.listdir("img/t18/")
     for eachfile in f:
-        img1 = imread("img/t3/" + eachfile, mode = 'RGB')
+        img1 = imread("img/t18/" + eachfile, mode = 'RGB')
         img1 = imresize(img1, (224, 224))
         prob = sess.run(vgg.probs, feed_dict={vgg.imgs: [img1]})[0]
         preds = (np.argsort(prob)[::-1])[0:5]

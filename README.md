@@ -30,4 +30,7 @@ python vgg16_fixed8bit/get_pbfile_from_npz.py
 * Transfering weights from float point to fixed point only make precision go down a little. 
 * float16 and fixed8 run much slower than float32. float32 works 133 times faster than fixed8 on GPU. 
 
+## val2011.txt val2012.txt
 
+* labels in val2011.txt are in range 1~1000
+* labels in val2012.txt are in range 0~999
